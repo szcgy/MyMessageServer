@@ -129,7 +129,7 @@ class MyMessageServer:
                         #开启这个客户的读取消息线程
                         threading.Thread(target=self.resciveThread,args=(newClient,newkey)).start()
                     else:
-                        self.disconnect(newClient, ClientKey)
+                        self.disconnect(newClient, newkey)
             except OSError:
                 break
 
