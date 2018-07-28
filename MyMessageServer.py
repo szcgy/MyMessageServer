@@ -8,7 +8,8 @@ import time
 import socket
 
 from common.auth import validate_password
-from common.utils import send
+from common.utils import send, recv
+from common.models import Session
 from common import const
 
 #我不是QQ
@@ -21,7 +22,7 @@ class MyMessageServer:
 
     def __init__(self):
         #设定好侦听端口
-        self.serverSocket.bind(("localhost",9099))
+        self.serverSocket.bind(("0.0.0.0",9099))
 
     #开启socket
     def openServer(self):
@@ -53,7 +54,7 @@ class MyMessageServer:
 
                     #传给所有客户端
                     for _clientIp,_client in self.clientsList.items():
-                        send(_client, (const.MSG, b'0'*32, data))
+                        send(_client, (const.MSG, 0, data))
                 else:
                     #没数据，估计是网络有问题，断掉
                     #客户端不能发空消息不然也会断掉
@@ -83,7 +84,7 @@ class MyMessageServer:
             return False
 
         def extract():
-            args = bytes.decode(content).split(' ')
+            args = content.split(' ')
             if len(args) < 4:
                 return None
             return args
@@ -122,7 +123,7 @@ class MyMessageServer:
                         #继续等
                         continue
                 #看看客户端是不是用51000来连的
-                if(newOne[1]!=51000):
+                if(False):
                     #不是断掉
                     newClient.close()
 
@@ -141,7 +142,7 @@ class MyMessageServer:
                     session = self.login(newClient, newkey)
                     if session:
                         #开启这个客户的读取消息线程
-                        send(newClient, (const.LOGIN, b'0'*32, session.token))
+                        send(newClient, (const.LOGIN, 0, session.token))
                         threading.Thread(target=self.resciveThread,args=(newClient,newkey)).start()
                     else:
                         self.disconnect(newClient, newkey)

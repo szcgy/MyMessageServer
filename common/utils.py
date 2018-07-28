@@ -13,7 +13,7 @@ def send(client, content):
     cmdType,token,cmd = content
     length = len(cmd)
     if length < 65536:
-        data = "%04x%04x%032X" % cmdType,length,token
+        data = "%04x%04x%032X" % (cmdType,length,token)
         data += cmd
         try:
             client.send(data.encode())
@@ -31,9 +31,9 @@ def recv(client,isServer = True):
         if cmd != const.LOGIN and not validate_token(token):
             raise PermissionDenied
     if length>0:
-        content = (cmd,unpack(client.recv(length)))
+        content = unpack(client.recv(length))
     else:
-        content = (cmd,"")
+        content = ""
     return cmd, token, content
 
 
