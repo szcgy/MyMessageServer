@@ -23,15 +23,17 @@ def send(client, content):
     print("Command Too Long!!!")
     return False
 
-def recv(client, content):
+def recv(client):
     cmd = int(client.recv(C_LENGTH), 16)
     length = int(client.recv(C_LENGTH), 16)
     token = unpack(client.recv(T_LENGTH))
 
     if cmd != const.LOGIN and not validate_token(token):
         raise PermissionDenied
-
-    content = unpack(client.recv(length))
+    if length>0:
+        content = unpack(client.recv(length))
+    else:
+        content = ""
     return content
 
 
