@@ -1,6 +1,12 @@
+from models import User, Session
 
-def validate_password(user, name):
-    return True
+def validate_password(username, password):
+    try:
+        user = User.get(User.username == username)
+    except User.DoesNotExist:
+        return False
+
+    return user.validate(password)
 
 def validate_token(token):
-    return True
+    return Session.validate(token)
