@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import common
 
 class MyMessageClient():
     clientSocket = socket.socket()
@@ -11,24 +12,17 @@ class MyMessageClient():
     def __init__(self,userName = "anonymous",passWord = "Failed"):
         self.user = userName
         self.password = passWord
-    def __sendCmd(self,cmdType,cmd):
-        length = len(cmd)
-        if length < 65536:
-            data = "%04x%04x%032X" % cmdType,length,self.token
-            data += cmd
-            try:
-                self.clientSocket.send(data.encode())
-                return True
-            except:
-                return False
-        print("Command Too Long!!!")
-        return False
+
     def connectServer(self):
         try:
             self.clientSocket.connect(("119.23.26.133",9099))
-            self.clientSocket.send('-u {0} -p {1}'.format(self.user,self.password).encode())
-            self.isOpen = True
-            return True
+            common.utils.send(self.clientSocket,(common.const.LOGIN,self.token,'{0}\t{1}'.format(self.user,self.password)))
+            try:
+                common.utils.recv(self.clientSocket)
+                self.isOpen = True
+                return True
+            except:
+                return False
         except ConnectionRefusedError as ex:
             print(ex.strerror)
             self.isOpen = False
@@ -48,7 +42,7 @@ class MyMessageClient():
     def startReading(self):
         threading.Thread(target=self.readingThread).start()
     def sendMsg(self,msg="None"):
-        self.clientSocket.send(('\"{0}\":{1}'.format(self.user,msg).encode()))
+        common.utils.send(self.clientSocket,(common.const.MSG,self.token,('\"{0}\":{1}'.format(self.user,msg))))
 
 def main():
     start = MyMessageClient(input("User Name:"),input("Password:"))
