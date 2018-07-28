@@ -10,8 +10,18 @@ T_LENGTH = 32
 
 
 def send(client, content):
-    pass
-
+    cmdType,token,cmd = content
+    length = len(cmd)
+    if length < 65536:
+        data = "%04x%04x%032X" % cmdType,length,token
+        data += cmd
+        try:
+            client.send(data.encode())
+            return True
+        except:
+            return False
+    print("Command Too Long!!!")
+    return False
 
 def recv(client, content):
     cmd = unpack(client.recv(C_LENGTH))
