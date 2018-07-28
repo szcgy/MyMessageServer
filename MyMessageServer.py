@@ -1,4 +1,3 @@
-import serial
 import threading
 import time
 import socket
@@ -61,7 +60,7 @@ class MyMessageServer:
                     self.clientsList.__delitem__(ClientKey)
                 break
   
-    def disconnect(client, key):
+    def disconnect(self, client, key):
         try:
             client.close()
         except:
