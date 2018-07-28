@@ -4,11 +4,13 @@ import random
 
 db = SqliteDatabase('db.sqlite3')
 
+HASH = hashlib.md5
+
 def r(count=100):
     s = ''
     for _ in range(count):
         s += str(random.randint(0, 9))
-    return hashlib.sha256(s.encode('utf8')).hexdigest()
+    return HASH(s.encode('utf8')).hexdigest()
 
 class User(Model):
     username = CharField(unique=True)
@@ -25,7 +27,7 @@ class User(Model):
     def _hash(self, password, salt, count):
         s = password
         for _ in range(count):
-            s = hashlib.sha256((salt + s).encode('utf8')).hexdigest()
+            s = HASH((salt + s).encode('utf8')).hexdigest()
         return s
 
     def setPassword(self, password):
@@ -41,7 +43,10 @@ class User(Model):
         if not self.hashed_password:
             return False
         attempt = self._hash(password, self.salt, self.iter_count)
-        return attempt == self.hashed_password
+        if attempt == self.hashed_password:
+            return self
+        else:
+            return False
         
 class Session(Model):
     token = CharField()
@@ -62,3 +67,8 @@ class Session(Model):
 
         return session.user
 
+    @classmethod
+    def setSession(cls, user):
+        exp = datetime.datetime.now() + datetime.timedelta(days=7)
+        session = cls.create(token=r(), user=user, expired_by=exp)
+        return session

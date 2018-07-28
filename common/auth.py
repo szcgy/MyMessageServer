@@ -1,4 +1,4 @@
-from models import User, Session
+from common.models import User, Session
 
 def validate_password(username, password):
     try:

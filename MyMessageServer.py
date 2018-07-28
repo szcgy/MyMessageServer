@@ -1,8 +1,15 @@
+import sys
+import os
+BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE)
+
 import threading
 import time
 import socket
 
 from common.auth import validate_password
+from common.utils import send
+from common import const
 
 #我不是QQ
 class MyMessageServer:
@@ -37,8 +44,8 @@ class MyMessageServer:
         while self.isOpen:
             try:
                 #接受数据
-                data = client.recv(255)
-                if data.__len__()>0:
+                cmd, token, data = recv(client)
+                if cmd == const.MSG and len(data) > 0:
                     #有数据
 
                     #打印出来看
@@ -46,7 +53,7 @@ class MyMessageServer:
 
                     #传给所有客户端
                     for _clientIp,_client in self.clientsList.items():
-                        _client.send(data)
+                        send(_client, (const.MSG, b'0'*32, data))
                 else:
                     #没数据，估计是网络有问题，断掉
                     #客户端不能发空消息不然也会断掉
@@ -69,8 +76,10 @@ class MyMessageServer:
 
     def login(self, client, key):
         try:
-            content = client.recv(255)
+            cmd, token, content = recv(client)
         except (ConnectionAbortedError, ConnectionResetError):
+            return False
+        if cmd != const.LOGIN:
             return False
 
         def extract():
@@ -84,7 +93,11 @@ class MyMessageServer:
             return False
 
         username, password = args[1], args[3]
-        return validate_password(username, password)
+        user = validate_password(username, password)
+        if not user:
+            return None
+        session = Session.setSession(user)
+        return session
 
 
     #接受客户端线程主体
@@ -125,8 +138,10 @@ class MyMessageServer:
                     #添加一个客户键值对
                     self.clientsList[newkey] = newClient
 
-                    if self.login(newClient, newkey):
+                    session = self.login(newClient, newkey)
+                    if session:
                         #开启这个客户的读取消息线程
+                        send(newClient, (const.LOGIN, b'0'*32, session.token))
                         threading.Thread(target=self.resciveThread,args=(newClient,newkey)).start()
                     else:
                         self.disconnect(newClient, newkey)

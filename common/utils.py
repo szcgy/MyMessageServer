@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
-from errors import PermissionDenied
-from auth import validate_token
-import const
+from common.errors import PermissionDenied
+from common.auth import validate_token
+from common import const
 
 
 C_LENGTH = 4
@@ -34,7 +34,7 @@ def recv(client,isServer = True):
         content = (cmd,unpack(client.recv(length)))
     else:
         content = (cmd,"")
-    return content
+    return cmd, token, content
 
 
 def unpack(content):
