@@ -68,7 +68,7 @@ class MyMessageServer:
             pass
         del self.clientsList[key]
 
-    def login(self, client):
+    def login(self, client, key):
         try:
             content = client.recv(255)
         except (ConnectionAbortedError, ConnectionResetError):

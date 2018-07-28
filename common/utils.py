@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from errors import PermissionDenied
 from auth import validate_token
+import const
 
 
 C_LENGTH = 4
@@ -17,7 +18,7 @@ def recv(client, content):
     length = int(unpack(client.recv(C_LENGTH)))
     token = unpack(client.recv(T_LENGTH))
 
-    if cmd != 0 and not validate_token(token):
+    if cmd != const.LOGIN and not validate_token(token):
         raise PermissionDenied
 
     content = unpack(client.recv(length))
