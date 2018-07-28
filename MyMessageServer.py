@@ -3,6 +3,8 @@ import threading
 import time
 import socket
 
+from common.auth import validate_password
+
 #我不是QQ
 class MyMessageServer:
     serverSocket = socket.socket()  #服务用Socket
@@ -50,14 +52,42 @@ class MyMessageServer:
                     #没数据，估计是网络有问题，断掉
                     #客户端不能发空消息不然也会断掉
                     client.close()
-                    self.clientsList.__delitem__(ClientKey)
+                    del self.clientsList[ClientKey]
+
                     break
-            except (ConnectionAbortedError,ConnectionResetError):
+            except (ConnectionAbortedError, ConnectionResetError):
                 #客户端主动把连接中断了
                 if self.accepting:
                     self.clientsList.__delitem__(ClientKey)
                 break
-    
+  
+    def disconnect(client, key):
+        try:
+            client.close()
+        except:
+            pass
+        del self.clientsList[key]
+
+    def login(self, client, key):
+        try:
+            content = client.recv(255)
+        except (ConnectionAbortedError, ConnectionResetError):
+            return False
+
+        def extract():
+            args = bytes.decode(content).split(' ')
+            if len(args) < 4:
+                return None
+            return args
+
+        args = extract()
+        if not args:
+            return False
+
+        username, password = args[1], args[3]
+        return validate_password(username, password)
+
+
     #接受客户端线程主体
     def acceptingThread(self):
         while self.accepting:
@@ -66,7 +96,9 @@ class MyMessageServer:
                 newClient,newOne = self.serverSocket.accept()
                 #等到了
                 #看在不在黑名单里
-                if(self.blackIpList.__contains__(newOne[0])):
+
+                if newOne[0] in self.blackIpList:
+
                     #在黑名单里
                     if self.blackIpList[newOne[0]] >= 3:
                         #还失败了三次
@@ -94,8 +126,11 @@ class MyMessageServer:
                     #添加一个客户键值对
                     self.clientsList[newkey] = newClient
 
-                    #开启这个客户的读取消息线程
-                    threading.Thread(target=self.resciveThread,args=(newClient,newkey)).start()
+                    if self.login(newClient, newkey):
+                        #开启这个客户的读取消息线程
+                        threading.Thread(target=self.resciveThread,args=(newClient,newkey)).start()
+                    else:
+                        self.disconnect(newClient, ClientKey)
             except OSError:
                 break
 
