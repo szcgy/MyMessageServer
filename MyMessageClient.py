@@ -18,15 +18,21 @@ class MyMessageClient():
             self.clientSocket.connect(("119.23.26.133",9099))
             common.utils.send(self.clientSocket,(common.const.LOGIN,self.token,'{0}\t{1}'.format(self.user,self.password)))
             try:
-                common.utils.recv(self.clientSocket,False)
-                self.isOpen = True
-                return True
+                cmdType,data = common.utils.recv(self.clientSocket,False)
+                if cmdType == 0X0000:
+                    self.token = int(data,16)
+                    print("recive token %s"%data)
+                    self.isOpen = True
+                    return True
+                else:
+                    return False
             except:
                 return False
         except ConnectionRefusedError as ex:
             print(ex.strerror)
             self.isOpen = False
             return False
+            
     def disconnect(self):
         self.isOpen = False
         self.clientSocket.close()
