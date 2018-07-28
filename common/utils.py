@@ -14,8 +14,8 @@ def send(client, content):
 
 
 def recv(client, content):
-    cmd = unpack(client.recv(C_LENGTH))
-    length = int(unpack(client.recv(C_LENGTH)))
+    cmd = int(client.recv(C_LENGTH), 16)
+    length = int(client.recv(C_LENGTH), 16)
     token = unpack(client.recv(T_LENGTH))
 
     if cmd != const.LOGIN and not validate_token(token):
