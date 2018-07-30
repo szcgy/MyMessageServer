@@ -12,8 +12,8 @@ T_LENGTH = 32
 def send(client, content):
     cmdType,token,cmd = content
     length = len(cmd)
-    if length < 65536:
-        data = "%04x%04x%032x" % (cmdType,length,token)
+    if length < 65536 and len(token)==32:
+        data = "%04x%04x%s" % (cmdType,length,token)
         data += cmd
         try:
             client.send(data.encode())
