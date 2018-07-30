@@ -13,7 +13,7 @@ def send(client, content):
     cmdType,token,cmd = content
     length = len(cmd)
     if length < 65536:
-        data = "%04x%04x%032X" % (cmdType,length,token)
+        data = "%04x%04x%032x" % (cmdType,length,token)
         data += cmd
         try:
             client.send(data.encode())
@@ -24,17 +24,21 @@ def send(client, content):
     return False
 
 def recv(client,isServer = True):
-    cmd = int(client.recv(C_LENGTH), 16)
-    length = int(client.recv(C_LENGTH), 16)
-    token = unpack(client.recv(T_LENGTH))
-    if isServer:
-        if cmd != const.LOGIN and not validate_token(token):
-            raise PermissionDenied
-    if length>0:
-        content = unpack(client.recv(length))
+    tryRecv = client.recv(C_LENGTH)
+    if len(tryRecv) == C_LENGTH:
+        cmd = int(tryRecv, 16)
+        length = int(client.recv(C_LENGTH), 16)
+        token = unpack(client.recv(T_LENGTH))
+        if isServer:
+            if cmd != const.LOGIN and not validate_token(token):
+                raise PermissionDenied
+        if length>0:
+            content = unpack(client.recv(length))
+        else:
+            content = ""
+        return cmd, token, content
     else:
-        content = ""
-    return cmd, token, content
+        raise ConnectionAbortedError
 
 
 def unpack(content):

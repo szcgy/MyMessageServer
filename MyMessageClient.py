@@ -34,21 +34,29 @@ class MyMessageClient():
             return False
             
     def disconnect(self):
-        self.isOpen = False
-        self.clientSocket.close()
+        utils.send(self.clientSocket,(const.LOGOUT,self.token,""))
+        
+
     def readingThread(self):
         while self.isOpen:
             try:
-                data = bytes.decode(self.clientSocket.recv(255))
-                if len(data)>0:
-                    print(data)
+                cmdType,token,data = utils.recv(self.clientSocket,False)
+                if cmdType == const.MSG:
+                    if len(data)>0:
+                        print(data)
+                elif cmdType == const.LOGOUT:
+                    print("退出登录")
+                    self.isOpen = False
+                    self.clientSocket.close()
+                    break                                        
             except (ConnectionAbortedError,ConnectionResetError):
+                print("服务器断开连接！")
                 self.isOpen = False
                 break
     def startReading(self):
         threading.Thread(target=self.readingThread).start()
     def sendMsg(self,msg="None"):
-        utils.send(self.clientSocket,(const.MSG,self.token,('\"{0}\":{1}'.format(self.user,msg))))
+        utils.send(self.clientSocket,(const.MSG,self.token,'{0}:\t{1}'.format(self.user,msg)))
 
 def main():
     start = MyMessageClient(input("User Name:"),input("Password:"))
@@ -58,9 +66,10 @@ def main():
         while start.isOpen:
             data = input()
             if data == "-x":
+                start.disconnect()
+                time.sleep(1)
                 break
             start.sendMsg(data)
-        start.disconnect()
     else:
         print("Loggin Failed!")
 

@@ -84,8 +84,8 @@ class MyMessageServer:
             return False
 
         def extract():
-            args = content.split(' ')
-            if len(args) < 4:
+            args = content.split('\t')
+            if len(args) < 2:
                 return None
             return args
 
@@ -93,7 +93,7 @@ class MyMessageServer:
         if not args:
             return False
 
-        username, password = args[1], args[3]
+        username, password = args[0], args[1]
         user = validate_password(username, password)
         if not user:
             return None
