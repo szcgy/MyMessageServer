@@ -1,14 +1,14 @@
 import socket
 import threading
 import time
-import common
-
+from common import const
+from common import utils
 class MyMessageClient():
     clientSocket = socket.socket()
     isOpen = False
     user = ""
     password = ""
-    token = 0
+    token = ""
     def __init__(self,userName = "anonymous",passWord = "Failed"):
         self.user = userName
         self.password = passWord
@@ -16,11 +16,11 @@ class MyMessageClient():
     def connectServer(self):
         try:
             self.clientSocket.connect(("119.23.26.133",9099))
-            common.utils.send(self.clientSocket,(common.const.LOGIN,self.token,'{0}\t{1}'.format(self.user,self.password)))
+            utils.send(self.clientSocket,(const.LOGIN,self.token,'{0}\t{1}'.format(self.user,self.password)))
             try:
-                cmdType,data = common.utils.recv(self.clientSocket,False)
-                if cmdType == 0X0000:
-                    self.token = int(data,16)
+                cmdType,token,data = utils.recv(self.clientSocket,False)
+                if cmdType == const.LOGIN:
+                    self.token = data
                     print("recive token %s"%data)
                     self.isOpen = True
                     return True
@@ -48,7 +48,7 @@ class MyMessageClient():
     def startReading(self):
         threading.Thread(target=self.readingThread).start()
     def sendMsg(self,msg="None"):
-        common.utils.send(self.clientSocket,(common.const.MSG,self.token,('\"{0}\":{1}'.format(self.user,msg))))
+        utils.send(self.clientSocket,(const.MSG,self.token,('\"{0}\":{1}'.format(self.user,msg))))
 
 def main():
     start = MyMessageClient(input("User Name:"),input("Password:"))
