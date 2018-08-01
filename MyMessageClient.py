@@ -6,6 +6,7 @@ from common import utils
 import tkinter as tk
 
 class MyMessageClient():
+    
     clientSocket = socket.socket()
     isOpen = False
     user = ""
@@ -57,7 +58,7 @@ class MyMessageClient():
                     print("退出登录")
                     self.isOpen = False
                     self.clientSocket.close()
-                    break                                        
+                    break
             except (ConnectionAbortedError,ConnectionResetError):
                 print("服务器断开连接！")
                 self.isOpen = False
@@ -67,13 +68,15 @@ class MyMessageClient():
         threading.Thread(target=self.readingThread).start()
 
     def sendMsg(self,msg="None"):
-        msg = self.__typeArea.dump('1.0',tk.END)
+        msg = self.__typeArea.dump(tk.ALL)
         if msg[0][0] == 'text' and len(msg[0][1]) > 0:
-            self.__typeArea.delete('1.0',tk.END)
+            self.__typeArea.delete(tk.ALL)
             utils.send(self.clientSocket,(const.MSG,self.token,'{0}:\t{1}'.format(self.user,msg[0][1])))
 
 def main():
+    
     start = MyMessageClient(input("User Name:"),input("Password:"))
+    start.guiRoot.mainloop()
     if(start.connectServer()):
         start.startReading()
         print("Loggin Successed!")

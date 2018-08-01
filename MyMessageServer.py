@@ -65,7 +65,7 @@ class MyMessageServer:
             except (ConnectionAbortedError, ConnectionResetError):
                 #客户端主动把连接中断了
                 if self.accepting:
-                    self.clientsList.__delitem__(ClientKey)
+                    del self.clientsList[ClientKey]
                 break
   
     def disconnect(self, client, key):
