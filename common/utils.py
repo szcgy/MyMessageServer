@@ -2,6 +2,7 @@
 from common.errors import PermissionDenied
 from common.auth import validate_token
 from common import const
+import base64
 
 
 C_LENGTH = 4
@@ -11,6 +12,7 @@ T_LENGTH = 32
 
 def send(client, content):
     cmdType,token,cmd = content
+    cmd = b64pack(cmd)
     length = len(cmd)
     if length < 65536 and len(token)==32:
         data = "%04x%04x%s" % (cmdType,length,token)
@@ -36,10 +38,22 @@ def recv(client,isServer = True):
             content = unpack(client.recv(length))
         else:
             content = ""
+        content = b64unpack(content)
         return cmd, token, content
     else:
         raise ConnectionAbortedError
 
 
 def unpack(content):
+    print([content, ])
     return bytes.decode(content)
+
+def b64pack(content):
+    if not content:
+        return ""
+    return base64.b64encode(content)
+
+def b64unpack(content):
+    if not content:
+        return ""
+    return base64.b64decode(content)
