@@ -16,10 +16,10 @@ def send(client, content):
         cmd = cmd.encode('utf8')
     length = len(cmd)
     if length < 65536 and len(token)==32:
-        data = "%04x%04x%s" % (cmdType,length,token)
+        data = ("%04x%04x%s" % (cmdType,length,token)).encode('utf8')
         data += cmd
         try:
-            client.send(data.encode())
+            client.send(data)
             return True
         except:
             return False

@@ -13,7 +13,7 @@ class MyMessageClient():
     password = ""
     token = "00000000000000000000000000000000"#32个0
     guiRoot = tk.Tk()
-    __talkArea = tk.Text(guiRoot,state = "disabled")
+    __talkArea = tk.Text(guiRoot)
     __typeArea = tk.Text(guiRoot,height=5)
 
     def __init__(self,userName = "anonymous",passWord = "Failed"):
