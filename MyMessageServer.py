@@ -54,7 +54,7 @@ class MyMessageServer:
 
                     #传给所有客户端
                     for _clientIp,_client in self.clientsList.items():
-                        send(_client, (const.MSG, 0, data))
+                        send(_client, (const.MSG, '0'*32, data))
                 else:
                     #没数据，估计是网络有问题，断掉
                     #客户端不能发空消息不然也会断掉
@@ -142,7 +142,7 @@ class MyMessageServer:
                     session = self.login(newClient, newkey)
                     if session:
                         #开启这个客户的读取消息线程
-                        send(newClient, (const.LOGIN, 0, session.token))
+                        send(newClient, (const.LOGIN, '0'*32, session.token))
                         threading.Thread(target=self.resciveThread,args=(newClient,newkey)).start()
                     else:
                         self.disconnect(newClient, newkey)
