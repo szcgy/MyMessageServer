@@ -1,5 +1,6 @@
 import sys
 import os
+from common import config
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 
@@ -22,7 +23,7 @@ class MyMessageServer:
 
     def __init__(self):
         #设定好侦听端口
-        self.serverSocket.bind(("0.0.0.0",9099))
+        self.serverSocket.bind(("0.0.0.0",config.prot))
 
     #开启socket
     def openServer(self):

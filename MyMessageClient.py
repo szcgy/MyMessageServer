@@ -3,6 +3,7 @@ import threading
 import time
 from common import const
 from common import utils
+from common import config
 import tkinter as tk
 
 class MyMessageClient():
@@ -26,7 +27,7 @@ class MyMessageClient():
         
     def connectServer(self):
         try:
-            self.clientSocket.connect(("119.23.26.133",9099))
+            self.clientSocket.connect((config.severIp,config.prot))
             utils.send(self.clientSocket,(const.LOGIN,self.token,'{0}\t{1}'.format(self.user,self.password)))
             try:
                 cmdType,token,data = utils.recv(self.clientSocket,False)
